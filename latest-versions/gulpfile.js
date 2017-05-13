@@ -17,12 +17,10 @@ function ftp_deploy(pass, name) {
             console.log('Param password is required');
             return;
       }
-      console.log(name + " files uploading");
-
-      return gulp.src('build/' + name + '/**/' + '*.*')
+      gulp.src('build/' + name + '/**/' + '*.*')
             .pipe(ftp({
-                  host: 'test.allenotify.pl',
-                  user: 'userTestWebSite',
+                  host: 'kaiwoklaw.pl',
+                  user: 'kaiwoklaw-ftp',
                   pass: pass,
                   remotePath: '/sites/latest-versions/' + name
             }))

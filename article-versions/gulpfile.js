@@ -20,8 +20,8 @@ function ftp_deploy(pass, name) {
       }
       gulp.src('build/' + name + '/**/' + '*.*')
             .pipe(ftp({
-                  host: 'test.allenotify.pl',
-                  user: 'userTestWebSite',
+                  host: 'kaiwoklaw.pl',
+                  user: 'kaiwoklaw-ftp',
                   pass: pass,
                   remotePath: '/sites/article-versions/' + name
             }))
