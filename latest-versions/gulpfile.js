@@ -10,6 +10,7 @@ var cleanCSS = require('gulp-clean-css');
 var uglify = require('gulp-uglify');
 var ftp = require('gulp-ftp');
 var gutil = require('gulp-util');
+var react = require('gulp-react');
 
 function ftp_deploy(pass, name) {
       if (pass === undefined || pass === true) {
@@ -35,6 +36,9 @@ gulp.task('ftp-deploy-backbone', function (pass) {
 });
 gulp.task('ftp-deploy-ember', function (pass) {
       return ftp_deploy(pass, 'ember');
+});
+gulp.task('ftp-deploy-react', function (pass) {
+      return ftp_deploy(pass, 'react');
 });
 gulp.task('build-angular', function () {
       var path = 'build/angular';
@@ -74,6 +78,9 @@ gulp.task('build-angular', function () {
             .pipe(concat("styles.min.css"))
             .pipe(gulp.dest(path + '/css'));
 
+});
+gulp.task('ftp-deploy-backbone', function (pass) {
+      return ftp_deploy(pass, 'backbone');
 });
 gulp.task('build-backbone', function () {
       var path = 'build/backbone';
@@ -146,5 +153,47 @@ gulp.task('build-ember', function () {
             .pipe(concat("styles.min.css"))
             .pipe(gulp.dest(path + '/css'));
 });
-gulp.task('default', ['build-angular', 'build-backbone', 'build-ember']);
-gulp.task('ftp-deploy-all', ['ftp-deploy-angular', 'ftp-deploy-backbone', 'ftp-deploy-ember']);
+gulp.task('build-react', function () {
+      var path = 'build/react';
+
+      del(path + '/*');
+
+      gulp.src([
+            'react/node_modules/todomvc-common/base.js',
+            'react/node_modules/react/dist/react-with-addons.js',
+            'react/node_modules/classnames/index.js',
+            'react/node_modules/director/build/director.js'
+      ])
+            .pipe(uglify({ mangle: true, compress: true, output: { beautify: false } }))
+            .pipe(concat("libs.min.js"))
+            .pipe(gulp.dest(path + '/js'));
+
+      gulp.src([
+            "react/js/utils.js",
+            "react/js/todoModel.js",
+            "react/js/todoItem.jsx",
+            "react/js/footer.jsx",
+            "react/js/app.jsx"])
+            .pipe(react())
+            .pipe(uglify({ mangle: true, compress: true, output: { beautify: false } }))
+            .pipe(concat("app.min.js"))
+            .pipe(gulp.dest(path + '/js'));
+
+      gulp.src([
+            'react/node_modules/todomvc-app-css/index.css',
+            'react/node_modules/todomvc-common/base.css'
+      ])
+            .pipe(cleanCSS())
+            .pipe(concat("styles.min.css"))
+            .pipe(gulp.dest(path + '/css'));
+
+      gulp.src(['react/index.html'])
+            .pipe(htmlreplace({
+                  'css': 'css/styles.min.css',
+                  'libsJS': 'js/libs.min.js',
+                  'appJS': 'js/app.min.js'
+            }))
+            .pipe(gulp.dest(path));
+});
+gulp.task('default', ['build-angular', 'build-backbone', 'build-ember', 'build-react']);
+gulp.task('ftp-deploy-all', ['ftp-deploy-angular', 'ftp-deploy-backbone', 'ftp-deploy-ember', 'ftp-deploy-react']);
