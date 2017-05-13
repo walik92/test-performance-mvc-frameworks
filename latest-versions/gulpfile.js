@@ -33,6 +33,9 @@ gulp.task('ftp-deploy-angular', function (pass) {
 gulp.task('ftp-deploy-backbone', function (pass) {
       return ftp_deploy(pass, 'backbone');
 });
+gulp.task('ftp-deploy-ember', function (pass) {
+      return ftp_deploy(pass, 'ember');
+});
 gulp.task('build-angular', function () {
       var path = 'build/angular';
 
@@ -115,5 +118,33 @@ gulp.task('build-backbone', function () {
             .pipe(concat("styles.min.css"))
             .pipe(gulp.dest(path + '/css'));
 });
-gulp.task('default', ['build-angular','build-backbone']);
-gulp.task('ftp-deploy-all', ['ftp-deploy-angular','ftp-deploy-backbone']);
+gulp.task('build-ember', function () {
+      var path = 'build/ember';
+
+      del(path + '/*');
+
+      gulp.src([
+            'ember/assets/vendor.js',
+            'ember/assets/todomvc.js',
+      ])
+            .pipe(uglify({ mangle: true, compress: true, output: { beautify: false } }))
+            .pipe(concat("libs.min.js"))
+            .pipe(gulp.dest(path + '/js'));
+
+      gulp.src(['ember/index.html'])
+            .pipe(htmlreplace({
+                  'css': 'css/styles.min.css',
+                  'libsJS': 'js/libs.min.js',
+            }))
+            .pipe(gulp.dest(path));
+
+      gulp.src([
+            'ember/assets/vendor.css',
+            'ember/assets/todomvc.css'
+      ])
+            .pipe(cleanCSS())
+            .pipe(concat("styles.min.css"))
+            .pipe(gulp.dest(path + '/css'));
+});
+gulp.task('default', ['build-angular', 'build-backbone', 'build-ember']);
+gulp.task('ftp-deploy-all', ['ftp-deploy-angular', 'ftp-deploy-backbone', 'ftp-deploy-ember']);
