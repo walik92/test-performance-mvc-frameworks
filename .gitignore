@@ -2,3 +2,5 @@
 .vscode
 article-versions/node_modules
 article-versions/build
+latest-versions/node_modules
+latest-versions/build
