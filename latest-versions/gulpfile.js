@@ -30,7 +30,9 @@ function ftp_deploy(pass, name) {
 gulp.task('ftp-deploy-angular', function (pass) {
       return ftp_deploy(pass, 'angular');
 });
-
+gulp.task('ftp-deploy-backbone', function (pass) {
+      return ftp_deploy(pass, 'backbone');
+});
 gulp.task('build-angular', function () {
       var path = 'build/angular';
 
@@ -70,6 +72,48 @@ gulp.task('build-angular', function () {
             .pipe(gulp.dest(path + '/css'));
 
 });
+gulp.task('build-backbone', function () {
+      var path = 'build/backbone';
 
-gulp.task('default', ['build-angular']);
-gulp.task('ftp-deploy-all', ['ftp-deploy-angular']);
+      del(path + '/*');
+
+      gulp.src([
+            'backbone/node_modules/todomvc-common/base.js',
+            'backbone/node_modules/jquery/dist/jquery.js',
+            'backbone/node_modules/underscore/underscore.js',
+            'backbone/node_modules/backbone/backbone.js',
+            'backbone/node_modules/backbone.localstorage/backbone.localStorage.js'
+      ])
+            .pipe(uglify({ mangle: true, compress: true, output: { beautify: false } }))
+            .pipe(concat("libs.min.js"))
+            .pipe(gulp.dest(path + '/js'));
+
+      gulp.src([
+            "backbone/js/models/todo.js",
+            "backbone/js/collections/todos.js",
+            "backbone/js/views/todo-view.js",
+            "backbone/js/views/app-view.js",
+            "backbone/js/routers/router.js",
+            "backbone/js/app.js"])
+            .pipe(uglify({ mangle: true, compress: true, output: { beautify: false } }))
+            .pipe(concat("app.min.js"))
+            .pipe(gulp.dest(path + '/js'));
+
+      gulp.src(['backbone/index.html'])
+            .pipe(htmlreplace({
+                  'css': 'css/styles.min.css',
+                  'libsJS': 'js/libs.min.js',
+                  'appJS': 'js/app.min.js'
+            }))
+            .pipe(gulp.dest(path));
+
+      gulp.src([
+            'backbone/node_modules/todomvc-common/base.css',
+            'backbone/node_modules/todomvc-app-css/index.css'
+      ])
+            .pipe(cleanCSS())
+            .pipe(concat("styles.min.css"))
+            .pipe(gulp.dest(path + '/css'));
+});
+gulp.task('default', ['build-angular','build-backbone']);
+gulp.task('ftp-deploy-all', ['ftp-deploy-angular','ftp-deploy-backbone']);
